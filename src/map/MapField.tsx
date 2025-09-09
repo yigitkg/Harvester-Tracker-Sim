@@ -52,7 +52,12 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
 
   return (
     <div className="card p-3 w-full">
-      <MapContainer ref={(m) => { mapRef.current = m; }} center={[37.6568, 27.366] as any} zoom={15} style={{ height: 560, width: '100%' }}>
+      <MapContainer
+        ref={(m) => { mapRef.current = m; }}
+        center={[37.6568, 27.366] as any}
+        zoom={15}
+        style={{ height: '70vh', minHeight: 560, maxHeight: 900, width: '100%' }}
+      >
         <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {localPoly && (
           <RLPolygon positions={coordsToLatLngs(localPoly.geometry.coordinates[0])} pathOptions={{ color: '#22c55e', weight: 2, fill: true, fillColor: '#16a34a', fillOpacity: 0.15 }} />
@@ -84,7 +89,7 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
         )}
         {position && (
           <Marker
-            icon={L.icon({ iconUrl: '/harvestericon1.png', iconSize: [28, 28], iconAnchor: [14, 14] })}
+            icon={L.icon({ iconUrl: '/harvestericon2.png', iconSize: [28, 28], iconAnchor: [14, 14] })}
             position={position as any}
           />
         )}
