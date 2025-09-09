@@ -57,7 +57,7 @@ export function useLaneSim(lanes: LineString[] | null, controls: LaneSimControls
     };
     rafRef.current = requestAnimationFrame(loop);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [lanes, controls.running, controls.speedKmh]);
+  }, [lanes, controls.running, controls.speedKmh, controls.timeScale]);
 
   useEffect(() => { setState({ laneIndex: 0, distM: 0 }); }, [lanes]);
 

@@ -60,7 +60,9 @@ export const defaultField: FieldConfig = {
 
 export const defaultMachine: MachineConfig = {
   tankCapacityKg: 8000,
-  unloadRateKgPerMin: 1200,
+  // Unloading is much faster than harvesting capture rate
+  // Typical modern combines: ~3000–6000 kg/min; pick a realistic mid value
+  unloadRateKgPerMin: 3600,
   optimalMinKmh: 5,
   optimalMaxKmh: 6,
   warnMaxKmh: 7, // begin noticeable loss ~7 km/h per research
@@ -188,41 +190,32 @@ export function tick({ dtMs, state, controls }: TickInput): SimState {
     }
   }
 
-  // Unloading state: move toward trailer and unload
+  // Unloading state: stop vehicle and unload (no movement while unloading)
   if (s.status === 'Unloading') {
-    // Move towards trailer at a fixed travel speed
-    const travelMps = kmhToMps(8);
-    const dx = s.field.trailer.x - s.pose.x;
-    const dy = s.field.trailer.y - s.pose.y;
-    const dist = Math.hypot(dx, dy);
-    if (dist > 0.1) {
-      const ux = dx / dist, uy = dy / dist;
-      const step = Math.min(dist, travelMps * dtSec);
-      s.pose.x += ux * step; s.pose.y += uy * step;
-      s.pose.headingDeg = (Math.atan2(uy, ux) * 180) / Math.PI;
-    } else {
-      // At trailer: unload
-      const unloadKgPerS = s.machine.unloadRateKgPerMin / 60;
-      const delta = unloadKgPerS * dtSec;
-      s.metrics.tankKg = Math.max(0, s.metrics.tankKg - delta);
-      s.metrics.tankFillPct = (s.metrics.tankKg / s.machine.tankCapacityKg) * 100;
-      if (s.metrics.tankKg <= 0.01) {
-        // summary snapshot
-        s.summary = {
-          totalHarvestedKg: s.machine.tankCapacityKg,
-          avgSpeedKmh: s.metrics.distanceM > 0 ? undefined as unknown as number : 0,
-          // For MVP, compute rough avg speed as current target; refined later
-          avgLossPct: s.metrics.lossPct,
-          areaHa: s.metrics.areaHarvestedHa,
-        };
-        // Reset tank and resume harvesting at next lane
-        s.metrics.tankKg = 0; s.metrics.tankFillPct = 0;
-        s.status = 'Harvesting';
-      }
+    // Speed is zero during unloading; throughput zero as well
+    s.metrics.speedKmh = 0;
+    s.metrics.throughputKgPerS = 0;
+    const unloadKgPerS = s.machine.unloadRateKgPerMin / 60;
+    const delta = unloadKgPerS * dtSec;
+    s.metrics.tankKg = Math.max(0, s.metrics.tankKg - delta);
+    s.metrics.tankFillPct = (s.metrics.tankKg / s.machine.tankCapacityKg) * 100;
+    if (s.metrics.tankKg <= 0.01) {
+      // summary snapshot
+      s.summary = {
+        totalHarvestedKg: s.machine.tankCapacityKg,
+        avgSpeedKmh: s.metrics.distanceM > 0 ? undefined as unknown as number : 0,
+        // For MVP, compute rough avg speed as current target; refined later
+        avgLossPct: s.metrics.lossPct,
+        areaHa: s.metrics.areaHarvestedHa,
+      };
+      // Reset tank and resume harvesting at next lane
+      s.metrics.tankKg = 0; s.metrics.tankFillPct = 0;
+      s.status = 'Harvesting';
     }
   }
 
   // Maintain displayed speed
-  s.metrics.speedKmh = speedKmh;
+  // Displayed speed is zero while unloading
+  s.metrics.speedKmh = s.status === 'Unloading' ? 0 : speedKmh;
   return s;
 }

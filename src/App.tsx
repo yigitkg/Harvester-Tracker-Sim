@@ -96,7 +96,15 @@ function App() {
   const defaultPoly = turf.polygon([[...defaultLL, defaultLL[0]]]) as unknown as Feature<TPolygon>
   const [fieldPolygon] = useState<Feature<TPolygon>>(defaultPoly)
   const [lanes] = useState<Feature<TLineString>[]>(() => generateLanes(defaultPoly as any, { headerWidthM: 7.5 }) as any)
-  const laneSim = useLaneSim(lanes.length ? lanes : null, { running: controls.running, speedKmh: controls.targetSpeedKmh, timeScale: state.timeScale })
+  const laneSim = useLaneSim(
+    lanes.length ? lanes : null,
+    {
+      running: controls.running && state.status !== 'Unloading',
+      // Drive visual movement from the effective sim speed
+      speedKmh: state.metrics.speedKmh,
+      timeScale: state.timeScale,
+    }
+  )
   const trStatus = state.status === 'Idle' ? 'Boşta' : state.status === 'Harvesting' ? 'Hasat' : state.status === 'Unloading' ? 'Boşaltma' : 'Alarm'
   return (
     <div className="min-h-screen flex flex-col">
