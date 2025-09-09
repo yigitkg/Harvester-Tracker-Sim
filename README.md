@@ -1,69 +1,43 @@
-# React + TypeScript + Vite
+# Harvester Tracker Sim
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Real-time combine harvester monitoring simulation with an animated SVG field map and professional, smooth UI/UX.
+Live metrics (speed, throughput, distance, tank fill, grain loss) with sticky alarms, unloading flow, and post-run summary.
+Built with React, TypeScript, Tailwind, and Vite using mock data; designed for future integration with real telemetry.
 
-Currently, two official plugins are available:
+## Run Locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Prerequisites:
+- Node.js 20.19+ recommended (Vite 7 requirement). Earlier 20.x may work but is not guaranteed.
 
-## Expanding the ESLint configuration
+Steps:
+1) Clone the repo and navigate into the app folder
+   - `git clone https://github.com/yigitkg/Harvester-Tracker-Sim.git`
+   - `cd Harvester-Tracker-Sim/app`
+2) Install dependencies
+   - `npm install`
+3) Start the dev server
+   - `npm run dev`
+4) Open the URL shown (typically `http://localhost:5173`)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Useful scripts:
+- `npm run build` – production build
+- `npm run preview` – preview built app
+- `npm run lint` – run ESLint rules
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## What This Project Demonstrates
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- Live harvester movement across a field (SVG) with smooth animations.
+- Real-time performance metrics: speed, harvesting rate, distance, grain throughput, grain loss.
+- Alarm logic: visible warning/alarm when speed exceeds optimal thresholds; sticky until resolved.
+- Unloading flow: tank fill → drive to trailer → unload animation → summary modal.
+- Operator statuses: Idle, Harvesting, Unloading, Alarm.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Tech Stack and UI
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- React + TypeScript + Vite
+- Tailwind CSS for styling
+- Font Awesome (CDN) for harvester icon (`fa-solid fa-tractor`)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Purpose and Next Steps
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+This is a professional UI/UX prototype for agricultural operations monitoring. It uses a deterministic simulation to generate realistic telemetry for design validation, demos, and training. The architecture can be extended to read real machine data and support multiple machines and maps.
