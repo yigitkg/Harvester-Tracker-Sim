@@ -7,7 +7,6 @@ Built with React, TypeScript, Tailwind, and Vite using mock data; designed for f
 ## Live Demo
 
 - Netlify: https://harvester-tracker-sm.netlify.app/
-- GitHub Pages: https://yigitkg.github.io/Harvester-Tracker-Sim/
 
 ## Run Locally
 
