@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Polyline, Marker, Polygon as RLPolygon } from 'react-leaflet';
 import L from 'leaflet';
 import type { LatLngExpression } from 'leaflet';
-import { faTractor } from '@fortawesome/free-solid-svg-icons';
 import 'leaflet/dist/leaflet.css';
 import * as turf from '@turf/turf';
 import type { Feature, Polygon as TPolygon, LineString as TLineString, Position } from 'geojson';
@@ -85,18 +84,12 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
         )}
         {position && (
           <Marker
-            icon={L.divIcon({ html: tractorSvg(22, '#10b981'), className: 'tractor-icon', iconSize: [22, 22] as any })}
+            icon={L.icon({ iconUrl: '/harvestericon1.png', iconSize: [28, 28], iconAnchor: [14, 14] })}
             position={position as any}
           />
         )}
       </MapContainer>
     </div>
   );
-}
-
-function tractorSvg(size = 22, color = '#10b981') {
-  const def: any = faTractor;
-  const [w, h, , , path] = def.icon as [number, number, any, any, string];
-  return `<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 ${w} ${h}\" width=\"${size}\" height=\"${size}\" fill=\"${color}\">\n    <path d=\"${path}\"/>\n  </svg>`;
 }
 
