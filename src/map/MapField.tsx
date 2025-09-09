@@ -41,16 +41,16 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
       const b = turf.bbox(target as any);
       const sw = L.latLng(b[1], b[0]);
       const ne = L.latLng(b[3], b[2]);
-      mapRef.current.fitBounds(L.latLngBounds(sw, ne), { padding: [8, 8], maxZoom: 18 });
-      // Nudge zoom in a bit on first load to feel less "far"
+      mapRef.current.fitBounds(L.latLngBounds(sw, ne), { padding: [8, 8], maxZoom: 19 });
+      // Nudge zoom in after bounds fit to ensure closer initial view
       if (!boostedZoomRef.current) {
         boostedZoomRef.current = true;
         const m = mapRef.current;
-        // After fit completes, increase zoom by 1 level
-        m.once('moveend', () => {
+        setTimeout(() => {
+          if (!m) return;
           const current = m.getZoom();
-          m.setZoom(Math.min((m as any).getMaxZoom?.() ?? 19, current + 1));
-        });
+          m.setZoom(Math.min(19, current + 1), { animate: true } as any);
+        }, 150);
       }
     }
   }, [polygon, localPoly]);
