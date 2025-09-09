@@ -16,7 +16,7 @@ Prerequisites:
 Steps:
 1) Clone the repo and navigate into the app folder
    - `git clone https://github.com/yigitkg/Harvester-Tracker-Sim.git`
-   - `cd Harvester-Tracker-Sim/app`
+   - `cd Harvester-Tracker-Sim`
 2) Install dependencies
    - `npm install`
 3) Start the dev server
