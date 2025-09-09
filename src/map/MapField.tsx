@@ -51,7 +51,7 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
   ), [lanes]);
 
   return (
-    <div className="card p-3 max-w-[1600px] w-full mx-auto">
+    <div className="card p-3 w-full">
       <MapContainer ref={(m) => { mapRef.current = m; }} center={[37.6568, 27.366] as any} zoom={15} style={{ height: 560, width: '100%' }}>
         <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {localPoly && (
@@ -92,4 +92,3 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
     </div>
   );
 }
-

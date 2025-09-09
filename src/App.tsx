@@ -102,11 +102,11 @@ function App() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="w-full p-0 space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between px-6 xl:px-8 2xl:px-12">
           <StatusPill label={trStatus} color={statusColor as any} />
           <div className="text-sm text-slate-400 font-mono tabular-nums w-28 text-right">Hazne: {state.metrics.tankFillPct.toFixed(0)}%</div>
         </div>
-        <div className="max-w-[1600px] mx-auto px-4">
+        <div className="w-full px-6 xl:px-8 2xl:px-12">
           <Controls
             running={controls.running}
             timeScale={state.timeScale}
@@ -117,9 +117,11 @@ function App() {
           />
           <MetricsGrid {...state.metrics} position={laneSim.position} />
         </div>
-        <MapField lanes={lanes} laneState={laneSim.laneState} position={laneSim.position as any} polygon={fieldPolygon as any} />
+        <div className="w-full px-6 xl:px-8 2xl:px-12">
+          <MapField lanes={lanes} laneState={laneSim.laneState} position={laneSim.position as any} polygon={fieldPolygon as any} />
+        </div>
         {state.summary && (
-          <div className="card p-4 max-w-[1600px] mx-auto px-4">
+          <div className="card p-4 w-full px-6 xl:px-8 2xl:px-12">
             <div className="text-lg font-semibold mb-2">Hasat Özeti</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
               <div>Toplam hasat: <b>{state.summary.totalHarvestedKg.toFixed(0)} kg</b></div>
