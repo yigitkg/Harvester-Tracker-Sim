@@ -15,6 +15,8 @@ export interface MachineConfig {
   warnMaxKmh: number; // start yellow band upper bound
   alarmMinKmh: number; // > triggers alarm
   yieldKgPerM2: number; // baseline yield density
+  lossWarnPct?: number; // warning threshold by loss percentage
+  lossAlarmPct?: number; // alarm threshold by loss percentage
 }
 
 export interface Metrics {
@@ -61,9 +63,12 @@ export const defaultMachine: MachineConfig = {
   unloadRateKgPerMin: 1200,
   optimalMinKmh: 5,
   optimalMaxKmh: 6,
-  warnMaxKmh: 8,
+  warnMaxKmh: 7, // begin noticeable loss ~7 km/h per research
   alarmMinKmh: 8,
-  yieldKgPerM2: 0.65, // ~6.5 t/ha
+  // Turkish average 400-800 kg/decare; use 600 kg/decare = 6.0 t/ha
+  yieldKgPerM2: 0.6,
+  lossWarnPct: 1.5,
+  lossAlarmPct: 2.0,
 };
 
 export function createInitialState(): SimState {
@@ -94,12 +99,23 @@ export function createInitialState(): SimState {
 export function kmhToMps(kmh: number) { return kmh / 3.6; }
 
 function computeLossPct(speedKmh: number, optimalMax: number, alarmMin: number): number {
-  // Baseline 0.8% at optimal; quadratic rise above optimal; stronger beyond 8 km/h
-  if (speedKmh <= optimalMax) return 0.8;
-  const over = Math.max(0, speedKmh - optimalMax);
-  let pct = 0.8 + 0.25 * over * over; // quadratic rise
-  if (speedKmh > alarmMin) pct += 0.4 * (speedKmh - alarmMin); // steeper in red zone
-  return Math.min(10, pct); // clamp
+  // Piecewise model aligned with research:
+  // - <= 6 km/h: ~1.0% baseline loss
+  // - 6–7 km/h: gentle quadratic rise to ~1.5%
+  // - 7–8 km/h: steeper linear rise to ~3.0%
+  // - > 8 km/h: strong linear rise (red zone)
+  if (speedKmh <= optimalMax) return 1.0;
+  if (speedKmh < 7) {
+    const t = speedKmh - optimalMax; // 0..1
+    return 1.0 + 0.5 * t * t; // up to ~1.5%
+  }
+  if (speedKmh < alarmMin) {
+    // 7..8 -> 1.5% .. 3.0%
+    return 1.5 + 1.5 * (speedKmh - 7);
+  }
+  // > 8 km/h -> 3% + 2.0% per km/h beyond 8
+  const pct = 3.0 + 2.0 * (speedKmh - 8);
+  return Math.min(12, pct); // clamp maximum
 }
 
 export interface TickInput {
@@ -118,9 +134,8 @@ export function tick({ dtMs, state, controls }: TickInput): SimState {
   const speedMps = kmhToMps(speedKmh);
 
   // Status transitions
-  const atAlarm = speedKmh > s.machine.alarmMinKmh;
   if (!controls.running && s.status !== 'Unloading') s.status = 'Idle';
-  else if (s.status !== 'Unloading') s.status = atAlarm ? 'Alarm' : 'Harvesting';
+  else if (s.status !== 'Unloading') s.status = 'Harvesting';
 
   // Movement & harvesting only when not unloading and running
   if (s.status !== 'Unloading' && controls.running) {
@@ -160,6 +175,12 @@ export function tick({ dtMs, state, controls }: TickInput): SimState {
 
     s.metrics.tankKg += capturedKgPerS * dtSec;
     s.metrics.tankFillPct = Math.min(100, (s.metrics.tankKg / s.machine.tankCapacityKg) * 100);
+
+    // Evaluate alarms based on loss
+    const lossAlarm = (s.machine.lossAlarmPct ?? 2.0);
+    if (lossPct >= lossAlarm) {
+      s.status = 'Alarm';
+    }
 
     // Tank full -> unloading
     if (s.metrics.tankKg >= s.machine.tankCapacityKg) {

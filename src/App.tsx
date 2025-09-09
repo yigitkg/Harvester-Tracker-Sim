@@ -74,7 +74,7 @@ function Controls({ running, timeScale, onStart, onPause, onReset, onTimeScale }
       <div className="flex items-center gap-2 ml-auto">
         <span className="text-sm text-slate-400">Zaman</span>
         <div className="inline-flex rounded-lg overflow-hidden border border-slate-700">
-          {[1,2,5].map((x) => (
+          {[1,2,5,20].map((x) => (
             <button key={x} onClick={() => onTimeScale(x)} className={`px-3 py-2 text-sm ${timeScale===x? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>{x}x</button>
           ))}
         </div>
@@ -102,6 +102,18 @@ function App() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="w-full p-0 space-y-4">
+        <div className="px-6 xl:px-8 2xl:px-12">
+          <div
+            className={
+              `rounded-lg px-4 py-3 text-center font-semibold pointer-events-none transition-opacity duration-200 ` +
+              (state.status === 'Alarm'
+                ? 'opacity-100 border border-rose-700 bg-rose-900/60 text-rose-200'
+                : 'opacity-0 border border-transparent')
+            }
+          >
+            Dane Kaybı Alarmı — Hızı düşürünüz (≥ 7 km/sa kayıp artar)
+          </div>
+        </div>
         <div className="flex items-center justify-between px-6 xl:px-8 2xl:px-12">
           <StatusPill label={trStatus} color={statusColor as any} />
           <div className="text-sm text-slate-400 font-mono tabular-nums w-28 text-right">Hazne: {state.metrics.tankFillPct.toFixed(0)}%</div>
