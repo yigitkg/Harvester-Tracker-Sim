@@ -37,7 +37,6 @@ function MetricsGrid({
   const items = [
     { label: 'Araç Hız', value: `${speedKmh.toFixed(1)} km/sa` },
     { label: 'Hasat Hızı', value: `${harvestingRateTPerH.toFixed(2)} t/sa · ${harvestingRateKgPerMin.toFixed(0)} kg/dk` },
-    { label: 'Hazne', value: `${tankKg.toFixed(0)} kg · ${tankFillPct.toFixed(0)}%` },
     { label: 'Dane Kaybı', value: `${lossPct.toFixed(1)}% · ${lossKgPerHa.toFixed(0)} kg/ha` },
     { label: 'Mesafe', value: `${distanceM.toFixed(0)} m` },
     { label: 'Alan', value: `${areaHarvestedHa.toFixed(3)} ha` },
@@ -123,7 +122,6 @@ function App() {
         </div>
         <div className="flex items-center justify-between px-6 xl:px-8 2xl:px-12">
           <StatusPill label={trStatus} color={statusColor as any} />
-          <div className="text-sm text-slate-400 font-mono tabular-nums w-28 text-right">Hazne: {state.metrics.tankFillPct.toFixed(0)}%</div>
         </div>
         <div className="w-full px-6 xl:px-8 2xl:px-12">
           <Controls
