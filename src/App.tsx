@@ -1,4 +1,4 @@
-import './App.css'
+﻿import './App.css'
 import './index.css'
 import { useSimulation } from './sim/useSimulation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -10,8 +10,8 @@ import { useState } from 'react'
 import * as turf from '@turf/turf'
 import { generateLanes } from './map/laneGen'
 
-function StatusPill({ label, color }: { label: string; color: 'green' | 'yellow' | 'red' }) {
-  const cls = color === 'green' ? 'status-green' : color === 'yellow' ? 'status-yellow' : 'status-red'
+function StatusPill({ label, color }: { label: string; color: 'green' | 'yellow' | 'red' | 'blue' }) {
+  const cls = color === 'green' ? 'status-green' : color === 'yellow' ? 'status-yellow' : color === 'red' ? 'status-red' : 'status-blue'
   return <span className={`status-pill ${cls}`}><span className="w-2 h-2 rounded-full bg-current inline-block"></span>{label}</span>
 }
 
@@ -46,7 +46,7 @@ function MetricsGrid({
   ];
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5 gap-3">
-      {items.map((m) => (
+      {items.map((m: any) => (
         <div key={m.label} className="card p-3 min-h-[92px] flex flex-col justify-between">
           <div className="metric">
             <div className="text-slate-400 text-[11px] uppercase tracking-wider">{m.label}</div>
@@ -62,8 +62,6 @@ function MetricsGrid({
     </div>
   )
 }
-
-// (Old FieldView removed from rendering; kept out to avoid unused code.)
 
 function Controls({ running, timeScale, onStart, onPause, onReset, onTimeScale }: any) {
   return (
@@ -85,8 +83,8 @@ function Controls({ running, timeScale, onStart, onPause, onReset, onTimeScale }
 
 function App() {
   const { state, controls, api } = useSimulation()
-  const statusColor = state.status === 'Alarm' ? 'red' : state.status === 'Unloading' ? 'yellow' : controls.running ? 'green' : 'yellow'
-  // Default demo field (given 4 corners) loaded by default
+  const isPaused = !controls.running && !!controls.paused
+  const statusColor = state.status === 'Alarm' ? 'red' : state.status === 'Unloading' ? 'yellow' : isPaused ? 'blue' : controls.running ? 'green' : 'yellow'
   const defaultLL: number[][] = [
     [27.364657, 37.656833],
     [27.368453, 37.657979],
@@ -100,12 +98,13 @@ function App() {
     lanes.length ? lanes : null,
     {
       running: controls.running && state.status !== 'Unloading',
-      // Drive visual movement from the effective sim speed
       speedKmh: state.metrics.speedKmh,
       timeScale: state.timeScale,
     }
   )
-  const trStatus = state.status === 'Idle' ? 'Boşta' : state.status === 'Harvesting' ? 'Hasat' : state.status === 'Unloading' ? 'Boşaltma' : 'Alarm'
+  const trStatus = (!controls.running && !!controls.paused)
+    ? 'Duraklatıldı'
+    : (state.status === 'Idle' ? 'Boşta' : state.status === 'Harvesting' ? 'Hasat' : state.status === 'Unloading' ? 'Boşaltılıyor' : 'Alarm')
   return (
     <div className="min-h-screen flex flex-col">
       <Header />

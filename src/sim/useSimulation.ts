@@ -4,12 +4,13 @@ import type { SimState } from './engine';
 
 export interface SimControls {
   running: boolean;
+  paused?: boolean;
   targetSpeedKmh: number;
 }
 
 export function useSimulation() {
   const [state, setState] = useState<SimState>(createInitialState());
-  const [controls, setControls] = useState<SimControls>({ running: false, targetSpeedKmh: 5.5 });
+  const [controls, setControls] = useState<SimControls>({ running: false, paused: false, targetSpeedKmh: 5.5 });
 
   // Autopilot speed profile (varies speed to simulate operator behavior)
   const autoEnabledRef = useRef(true);
@@ -21,6 +22,7 @@ export function useSimulation() {
 
   const rafRef = useRef<number | null>(null);
   const lastRef = useRef<number | null>(null);
+  const accumRef = useRef<number>(0);
 
   function pickNextSegment() {
     // Segment types: cruise (5.2-5.8), push (7.2-8.2), overspeed (8.5-9.5)
@@ -69,9 +71,14 @@ export function useSimulation() {
         currentSpeedRef.current = controls.targetSpeedKmh;
       }
 
-      // Build effective controls without triggering effect restarts
-      const effectiveSpeed = autoEnabledRef.current ? currentSpeedRef.current : controls.targetSpeedKmh;
-      setState((s) => tick({ dtMs: dt, state: s, controls: { running: controls.running, targetSpeedKmh: effectiveSpeed } }));
+      // Accumulate and tick at ~5 Hz to reduce React work
+      accumRef.current += dt;
+      if (accumRef.current >= 200) {
+        accumRef.current = 0;
+        // Build effective controls without triggering effect restarts
+        const effectiveSpeed = autoEnabledRef.current ? currentSpeedRef.current : controls.targetSpeedKmh;
+        setState((s) => tick({ dtMs: 200, state: s, controls: { running: controls.running, targetSpeedKmh: effectiveSpeed } }));
+      }
       rafRef.current = requestAnimationFrame(loop);
     };
     rafRef.current = requestAnimationFrame(loop);
@@ -80,9 +87,9 @@ export function useSimulation() {
   }, [controls.running, state.timeScale]);
 
   const api = {
-    start: () => setControls((c) => ({ ...c, running: true })),
-    pause: () => setControls((c) => ({ ...c, running: false })),
-    reset: () => { setState(createInitialState()); setControls({ running: false, targetSpeedKmh: 5.5 }); },
+    start: () => setControls((c) => ({ ...c, running: true, paused: false })),
+    pause: () => setControls((c) => ({ ...c, running: false, paused: true })),
+    reset: () => { setState(createInitialState()); setControls({ running: false, paused: false, targetSpeedKmh: 5.5 }); },
     setSpeed: (v: number) => setControls((c) => ({ ...c, targetSpeedKmh: v })),
     setTimeScale: (v: number) => setState((s) => ({ ...s, timeScale: v })),
     enableAutopilot: (on: boolean) => { autoEnabledRef.current = on; },

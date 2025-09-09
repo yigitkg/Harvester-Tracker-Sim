@@ -23,6 +23,17 @@ function coordsToLatLngs(coords: Position[]): LatLngExpression[] {
   return coords.map((c) => [c[1], c[0]]);
 }
 
+type LatLng = [number, number]; // [lat, lng]
+function offsetLL(point: LatLng, distanceM: number, bearingDeg: number): LatLng {
+  const pt = turf.point([point[1], point[0]]);
+  const dest = turf.destination(pt, distanceM / 1000, bearingDeg, { units: 'kilometers' });
+  const [lng, lat] = (dest.geometry.coordinates as [number, number]);
+  return [lat, lng];
+}
+function lerpLL(a: LatLng, b: LatLng, t: number): LatLng {
+  return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+}
+
 export interface MapFieldProps {
   lanes: LineString[];
   position?: LatLngExpression | null;
@@ -61,42 +72,78 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
       .map(l => coordsToLatLngs(l.geometry.coordinates))
   ), [lanes]);
 
+  // Precompute lane rectangles (full strips) for harvested coverage
+  const headerWidthM = 7.5;
+  const laneRects = useMemo(() => {
+    return (lanes ?? []).map((ln) => {
+      const coords = (ln.geometry.coordinates as [number, number][]);
+      const Axy = coords[0];
+      const Bxy = coords[coords.length - 1];
+      const A: LatLng = [Axy[1], Axy[0]];
+      const B: LatLng = [Bxy[1], Bxy[0]];
+      const lenM = turf.length(ln as any, { units: 'kilometers' }) * 1000;
+      const bearing = turf.bearing(turf.point(Axy), turf.point(Bxy));
+      const leftBear = bearing - 90;
+      const rightBear = bearing + 90;
+      const half = headerWidthM / 2;
+      const A_left = offsetLL(A, half, leftBear);
+      const A_right = offsetLL(A, half, rightBear);
+      const B_left = offsetLL(B, half, leftBear);
+      const B_right = offsetLL(B, half, rightBear);
+      const fullRect: LatLngExpression[] = [A_left, A_right, B_right, B_left];
+      return { A, B, lenM, leftBear, rightBear, A_left, A_right, fullRect };
+    });
+  }, [lanes]);
+
   return (
     <div className="card p-3 w-full">
       <MapContainer
         ref={(m) => { mapRef.current = m; }}
         center={[37.6568, 27.366] as any}
         zoom={15}
+        preferCanvas={true}
+        updateWhenIdle={true}
         maxZoom={19}
         style={{ height: '70vh', minHeight: 560, maxHeight: 720, width: '100%' }}
       >
-        <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
+        <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} keepBuffer={1} />
         {polygon && (
           <RLPolygon positions={coordsToLatLngs(polygon.geometry.coordinates[0])} pathOptions={{ color: '#22c55e', weight: 2, fill: true, fillColor: '#16a34a', fillOpacity: 0.15 }} />
         )}
         {laneLatLngs.map((ll, idx) => (
           <Polyline key={idx} positions={ll} pathOptions={{ color: '#94a3b8', weight: 2, opacity: 0.6 }} />
         ))}
-        {/* Coverage shading */}
-        {laneState && lanes && lanes.length > 0 && (
+        {/* Coverage shading via rectangles: completed lanes + partial current lane */}
+        {laneState && laneRects && laneRects.length > 0 && (
           <>
-            {lanes.map((ln, idx) => {
-              const coords = (ln.geometry as any).coordinates as any[];
-              if (!coords || coords.length < 2) return null;
-              if (idx < laneState.laneIndex) {
-                return <Polyline key={`cov-full-${idx}`} positions={coordsToLatLngs(ln.geometry.coordinates)} pathOptions={{ color: '#10b981', weight: 6, opacity: 0.35 }} />
-              }
-              if (idx === laneState.laneIndex) {
-                const lenM = turf.length(ln as any, { units: 'kilometers' }) * 1000;
-                const distKm = Math.max(0, Math.min(lenM, laneState.distM)) / 1000;
-                if (distKm <= 0) return null;
-                const seg = turf.lineSliceAlong(ln as any, 0, distKm, { units: 'kilometers' });
-                const segCoords = (seg as any).geometry.coordinates as any[];
-                if (!segCoords || segCoords.length < 2) return null;
-                return <Polyline key={`cov-part-${idx}`} positions={coordsToLatLngs(segCoords)} pathOptions={{ color: '#10b981', weight: 6, opacity: 0.5 }} />
-              }
-              return null;
-            })}
+            {laneRects.map((lr, idx) => (
+              idx < laneState.laneIndex ? (
+                <RLPolygon
+                  key={`cov-full-${idx}`}
+                  positions={lr.fullRect}
+                  pathOptions={{ color: '#10b981', weight: 0, fill: true, fillOpacity: 0.28, fillColor: '#10b981' }}
+                />
+              ) : null
+            ))}
+            {(() => {
+              const idx = laneState.laneIndex;
+              const lr = laneRects[idx];
+              if (!lr) return null;
+              const t = lr.lenM > 0 ? Math.max(0, Math.min(1, laneState.distM / lr.lenM)) : 0;
+              if (t <= 0) return null;
+              const P = lerpLL(lr.A, lr.B, t);
+              const half = headerWidthM / 2;
+              const P_left = offsetLL(P as LatLng, half, lr.leftBear);
+              const P_right = offsetLL(P as LatLng, half, lr.rightBear);
+              const partialRect: LatLngExpression[] = [lr.A_left, lr.A_right, P_right, P_left];
+              return (
+                <RLPolygon
+                  key={`cov-part-${idx}`}
+                  positions={partialRect}
+                  pathOptions={{ color: '#10b981', weight: 0, fill: true, fillOpacity: 0.45, fillColor: '#10b981' }}
+                />
+              );
+            })()}
           </>
         )}
         {position && (

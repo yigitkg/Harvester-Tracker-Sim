@@ -21,6 +21,7 @@ body { @apply bg-slate-900 text-slate-100 antialiased overflow-x-hidden; }
 .status-green { @apply bg-emerald-900/50 text-emerald-300 border border-emerald-700/50; }
 .status-yellow { @apply bg-amber-900/40 text-amber-300 border border-amber-700/50; }
 .status-red { @apply bg-rose-900/40 text-rose-300 border border-rose-700/50; }
+.status-blue { @apply bg-sky-900/40 text-sky-300 border border-sky-700/50; }
 
 .metric { @apply text-slate-300 text-sm; }
 .metric .value { @apply text-2xl font-semibold text-slate-100 font-mono tabular-nums tracking-tight block w-full; }
