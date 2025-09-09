@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg: #0b1220;
+  --color-panel: #101827;
+  --color-muted: #9aa4b2;
+  --color-text: #e5e7eb;
+  --green: #16a34a;
+  --yellow: #f59e0b;
+  --red: #ef4444;
+}
+
+html, body, #root { height: 100%; }
+body { @apply bg-slate-900 text-slate-100 antialiased overflow-x-hidden; }
+
+.card { @apply rounded-xl bg-slate-800/80 border border-slate-700/60 shadow-sm; }
+
+.status-pill { @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium; }
+.status-green { @apply bg-emerald-900/50 text-emerald-300 border border-emerald-700/50; }
+.status-yellow { @apply bg-amber-900/40 text-amber-300 border border-amber-700/50; }
+.status-red { @apply bg-rose-900/40 text-rose-300 border border-rose-700/50; }
+
+.metric { @apply text-slate-300 text-sm; }
+.metric .value { @apply text-2xl font-semibold text-slate-100 font-mono tabular-nums tracking-tight block w-full; }
+
+.metric-card { @apply min-h-[92px]; }
