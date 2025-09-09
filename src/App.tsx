@@ -29,23 +29,28 @@ function Header() {
 
 function MetricsGrid({
   speedKmh, harvestingRateTPerH, harvestingRateKgPerMin, distanceM, throughputKgPerS, lossPct, lossKgPerHa, tankKg, tankFillPct, areaHarvestedHa,
+  position,
 }: any) {
+  const coord = Array.isArray(position)
+    ? `${position[0].toFixed(5)}, ${position[1].toFixed(5)}`
+    : '—';
   const items = [
     { label: 'Hız', value: `${speedKmh.toFixed(1)} km/sa` },
     { label: 'Hasat Hızı', value: `${harvestingRateTPerH.toFixed(2)} t/sa · ${harvestingRateKgPerMin.toFixed(0)} kg/dk` },
-    { label: 'Mesafe', value: `${distanceM.toFixed(0)} m` },
-    { label: 'Anlık Akış', value: `${throughputKgPerS.toFixed(1)} kg/sn` },
-    { label: 'Dane Kaybı', value: `${lossPct.toFixed(1)}% · ${lossKgPerHa.toFixed(0)} kg/ha` },
     { label: 'Hazne', value: `${tankKg.toFixed(0)} kg · ${tankFillPct.toFixed(0)}%` },
+    { label: 'Dane Kaybı', value: `${lossPct.toFixed(1)}% · ${lossKgPerHa.toFixed(0)} kg/ha` },
+    { label: 'Mesafe', value: `${distanceM.toFixed(0)} m` },
     { label: 'Alan', value: `${areaHarvestedHa.toFixed(3)} ha` },
-  ]
+    { label: 'Anlık Akış', value: `${throughputKgPerS.toFixed(1)} kg/sn` },
+    { label: 'Koordinat', value: coord, mono: true },
+  ];
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
       {items.map((m) => (
-        <div key={m.label} className="card p-3 metric-card">
+        <div key={m.label} className="card p-3 h-24 flex flex-col justify-between">
           <div className="metric">
-            <div className="text-slate-400 text-xs uppercase tracking-wide">{m.label}</div>
-            <div className="value mt-1 text-right">{m.value}</div>
+            <div className="text-slate-400 text-[11px] uppercase tracking-wider">{m.label}</div>
+            <div className={`value mt-1 text-right ${m.mono ? 'font-mono tabular-nums text-xl' : ''}`}>{m.value}</div>
           </div>
         </div>
       ))}
@@ -105,7 +110,7 @@ function App() {
             onReset={api.reset}
             onTimeScale={api.setTimeScale}
           />
-          <MetricsGrid {...state.metrics} />
+          <MetricsGrid {...state.metrics} position={laneSim.position} />
         </div>
         <MapField lanes={lanes} laneState={laneSim.laneState} position={laneSim.position as any} polygon={fieldPolygon as any} />
         {state.summary && (
