@@ -47,8 +47,9 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
         boostedZoomRef.current = true;
         const m = mapRef.current;
         m?.once('moveend', () => {
-          const current = m.getZoom();
-          m.setZoom(Math.min(19, current + 2), { animate: true } as any);
+          const targetZoom = (m.options as any).maxZoom ?? 19;
+          const center = m.getCenter();
+          m.setView(center, targetZoom, { animate: true } as any);
         });
       }
     }
@@ -66,9 +67,10 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
         ref={(m) => { mapRef.current = m; }}
         center={[37.6568, 27.366] as any}
         zoom={15}
+        maxZoom={19}
         style={{ height: '70vh', minHeight: 560, maxHeight: 720, width: '100%' }}
       >
-        <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" maxZoom={19} />
         {polygon && (
           <RLPolygon positions={coordsToLatLngs(polygon.geometry.coordinates[0])} pathOptions={{ color: '#22c55e', weight: 2, fill: true, fillColor: '#16a34a', fillOpacity: 0.15 }} />
         )}
