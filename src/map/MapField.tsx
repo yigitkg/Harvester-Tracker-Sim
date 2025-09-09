@@ -33,6 +33,7 @@ export interface MapFieldProps {
 export function MapField({ lanes, position, polygon, laneState }: MapFieldProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [localPoly, setLocalPoly] = useState<Polygon | null>(polygon ?? null);
+  const boostedZoomRef = useRef(false);
   useEffect(() => { if (polygon) setLocalPoly(polygon); }, [polygon]);
   useEffect(() => {
     const target = polygon || localPoly;
@@ -40,7 +41,17 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
       const b = turf.bbox(target as any);
       const sw = L.latLng(b[1], b[0]);
       const ne = L.latLng(b[3], b[2]);
-      mapRef.current.fitBounds(L.latLngBounds(sw, ne), { padding: [20, 20] });
+      mapRef.current.fitBounds(L.latLngBounds(sw, ne), { padding: [8, 8], maxZoom: 18 });
+      // Nudge zoom in a bit on first load to feel less "far"
+      if (!boostedZoomRef.current) {
+        boostedZoomRef.current = true;
+        const m = mapRef.current;
+        // After fit completes, increase zoom by 1 level
+        m.once('moveend', () => {
+          const current = m.getZoom();
+          m.setZoom(Math.min((m as any).getMaxZoom?.() ?? 19, current + 1));
+        });
+      }
     }
   }, [polygon, localPoly]);
 
