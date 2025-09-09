@@ -1,8 +1,9 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
 }
 
 .logo {
@@ -34,7 +35,7 @@
 }
 
 .card {
-  padding: 2em;
+  /* Padding is controlled via Tailwind utilities (e.g., p-3) */
 }
 
 .read-the-docs {
