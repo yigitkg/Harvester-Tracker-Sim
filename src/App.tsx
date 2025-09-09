@@ -33,7 +33,7 @@ function MetricsGrid({
 }: any) {
   const coord = Array.isArray(position) ? `${position[0].toFixed(5)}, ${position[1].toFixed(5)}` : '-';
   const items = [
-    { label: 'Arac Hiz', value: `${speedKmh.toFixed(1)} km/sa` },
+    { label: 'Arac Hizi', value: `${speedKmh.toFixed(1)} km/sa` },
     { label: 'Hasat Hizi', value: `${harvestingRateTPerH.toFixed(2)} t/sa - ${harvestingRateKgPerMin.toFixed(0)} kg/dk` },
     { label: 'Dane Kaybi', value: `${lossPct.toFixed(1)}% - ${lossKgPerHa.toFixed(0)} kg/ha` },
     { label: 'Mesafe', value: `${distanceM.toFixed(0)} m` },
