@@ -26,10 +26,10 @@ jobs:
         with:
           node-version: 20.19.0
 
-      - name: Install and build
+      - name: Install and build (GH Pages base)
         run: |
           npm ci
-          npm run build
+          npm run build -- --base=/Harvester-Tracker-Sim/
           cp dist/index.html dist/404.html
 
       - name: Upload artifact
