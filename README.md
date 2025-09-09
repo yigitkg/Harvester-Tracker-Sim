@@ -4,6 +4,11 @@ Real-time combine harvester monitoring simulation with an animated SVG field map
 Live metrics (speed, throughput, distance, tank fill, grain loss) with sticky alarms, unloading flow, and post-run summary.
 Built with React, TypeScript, Tailwind, and Vite using mock data; designed for future integration with real telemetry.
 
+## Live Demo
+
+- Netlify: https://harvester-tracker-sm.netlify.app/
+- GitHub Pages: https://yigitkg.github.io/Harvester-Tracker-Sim/
+
 ## Run Locally
 
 Prerequisites:
