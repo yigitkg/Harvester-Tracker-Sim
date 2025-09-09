@@ -52,7 +52,7 @@ function MetricsGrid({
             <div className="text-slate-400 text-[11px] uppercase tracking-wider">{m.label}</div>
             <div
               title={String(m.value)}
-              className={`value mt-1 text-right ${m.mono ? 'font-mono tabular-nums' : ''} ${m.wrap ? 'break-all text-base md:text-lg' : 'overflow-hidden text-ellipsis whitespace-nowrap text-xl md:text-2xl'}`}
+              className={`value mt-1 text-center ${m.mono ? 'font-mono tabular-nums' : ''} ${m.wrap ? 'break-all text-base md:text-lg' : 'overflow-hidden text-ellipsis whitespace-nowrap text-xl md:text-2xl'}`}
             >
               {m.value}
             </div>
