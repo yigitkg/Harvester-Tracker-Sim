@@ -30,6 +30,7 @@ export interface Metrics {
   lossPct: number; // percentage of potential throughput lost
   lossKgPerHa: number;
   areaHarvestedHa: number;
+  batorRpm?: number; // Batör devri (rpm)
 }
 
 export interface Pose { x: number; y: number; headingDeg: number; }
@@ -92,6 +93,7 @@ export function createInitialState(): SimState {
       lossPct: 0.8,
       lossKgPerHa: 0,
       areaHarvestedHa: 0,
+      batorRpm: 1000,
     },
     timeScale: 1,
     summary: null,
@@ -214,8 +216,19 @@ export function tick({ dtMs, state, controls }: TickInput): SimState {
     }
   }
 
-  // Maintain displayed speed
-  // Displayed speed is zero while unloading
+  // Maintain displayed speed (zero while unloading)
   s.metrics.speedKmh = s.status === 'Unloading' ? 0 : speedKmh;
+
+  // Update Batör devri (rpm): smooth random walk within 900–1100 rpm
+  {
+    const prev = s.metrics.batorRpm ?? 1000;
+    const center = 1000;
+    const jitter = (Math.random() - 0.5) * 30; // ±15 rpm per tick (~5 Hz)
+    const pull = (center - prev) * 0.03; // small pull to center
+    let next = prev + pull + jitter;
+    if (next < 900) next = 900 + Math.random() * 10;
+    if (next > 1100) next = 1100 - Math.random() * 10;
+    s.metrics.batorRpm = next;
+  }
   return s;
 }

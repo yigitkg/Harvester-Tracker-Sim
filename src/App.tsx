@@ -17,34 +17,38 @@ function StatusPill({ label, color }: { label: string; color: 'green' | 'yellow'
 
 function Header() {
   return (
-      <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/60 sticky top-0 z-10">
-        <div className="flex items-center gap-3 text-xl font-semibold">
-          <FontAwesomeIcon icon={faTractor} className="text-emerald-400" />
-        <span>Biçerdöver İzleme Paneli</span>
-        </div>
-      <div className="text-sm text-slate-400">Simülasyon</div>
+    <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/60 sticky top-0 z-10">
+      <div className="flex items-center gap-3 text-xl font-semibold">
+        <FontAwesomeIcon icon={faTractor} className="text-emerald-400" />
+        <span>Bicerdover Izleme Paneli</span>
       </div>
+      <div className="text-sm text-slate-400">Simulasyon</div>
+    </div>
   )
 }
 
 function MetricsGrid({
-  speedKmh, harvestingRateTPerH, harvestingRateKgPerMin, distanceM, throughputKgPerS, lossPct, lossKgPerHa, tankKg, tankFillPct, areaHarvestedHa,
+  speedKmh, harvestingRateTPerH, harvestingRateKgPerMin, distanceM, throughputKgPerS, lossPct, lossKgPerHa, areaHarvestedHa, batorRpm,
   position,
 }: any) {
-  const coord = Array.isArray(position)
-    ? `${position[0].toFixed(5)}, ${position[1].toFixed(5)}`
-    : '—';
+  const coord = Array.isArray(position) ? `${position[0].toFixed(5)}, ${position[1].toFixed(5)}` : '-';
   const items = [
-    { label: 'Araç Hız', value: `${speedKmh.toFixed(1)} km/sa` },
-    { label: 'Hasat Hızı', value: `${harvestingRateTPerH.toFixed(2)} t/sa · ${harvestingRateKgPerMin.toFixed(0)} kg/dk` },
-    { label: 'Dane Kaybı', value: `${lossPct.toFixed(1)}% · ${lossKgPerHa.toFixed(0)} kg/ha` },
+    { label: 'Arac Hiz', value: `${speedKmh.toFixed(1)} km/sa` },
+    { label: 'Hasat Hizi', value: `${harvestingRateTPerH.toFixed(2)} t/sa - ${harvestingRateKgPerMin.toFixed(0)} kg/dk` },
+    { label: 'Dane Kaybi', value: `${lossPct.toFixed(1)}% - ${lossKgPerHa.toFixed(0)} kg/ha` },
     { label: 'Mesafe', value: `${distanceM.toFixed(0)} m` },
     { label: 'Alan', value: `${areaHarvestedHa.toFixed(3)} ha` },
-    { label: 'Anlık Akış', value: `${throughputKgPerS.toFixed(1)} kg/sn` },
+    { label: 'Anlik Akis', value: `${throughputKgPerS.toFixed(1)} kg/sn` },
+    { label: 'Bator Devri', value: `${Math.round(1000)} rpm`, mono: true },
+    { label: 'Ust Elek Acikligi', value: `12 mm` },
+    { label: 'Alt Elek Acikligi', value: `5 mm` },
+    { label: 'Arac Plakasi', value: '09 S 2162' },
+    { label: 'Tohum Markasi', value: 'Progen Lucilla' },
+    { label: 'Operator Ad Soyad', value: 'Ali Yilmaz' },
     { label: 'Koordinat', value: coord, mono: true, wrap: true },
   ];
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
       {items.map((m: any) => (
         <div key={m.label} className="card p-3 min-h-[92px] flex flex-col justify-between">
           <div className="metric">
@@ -65,9 +69,9 @@ function MetricsGrid({
 function Controls({ running, timeScale, onStart, onPause, onReset, onTimeScale }: any) {
   return (
     <div className="card p-4 flex flex-wrap items-center gap-3">
-      <button onClick={onStart} disabled={running} className="px-3 py-2 bg-emerald-600 disabled:opacity-50 hover:bg-emerald-500 rounded-lg">Başlat</button>
+      <button onClick={onStart} disabled={running} className="px-3 py-2 bg-emerald-600 disabled:opacity-50 hover:bg-emerald-500 rounded-lg">Baslat</button>
       <button onClick={onPause} disabled={!running} className="px-3 py-2 bg-slate-700 disabled:opacity-50 hover:bg-slate-600 rounded-lg">Duraklat</button>
-      <button onClick={onReset} className="px-3 py-2 bg-rose-600 hover:bg-rose-500 rounded-lg">Sıfırla</button>
+      <button onClick={onReset} className="px-3 py-2 bg-rose-600 hover:bg-rose-500 rounded-lg">Sifirla</button>
       <div className="flex items-center gap-2 ml-auto">
         <span className="text-sm text-slate-400">Zaman</span>
         <div className="inline-flex rounded-lg overflow-hidden border border-slate-700">
@@ -84,6 +88,7 @@ function App() {
   const { state, controls, api } = useSimulation()
   const isPaused = !controls.running && !!controls.paused
   const statusColor = state.status === 'Alarm' ? 'red' : state.status === 'Unloading' ? 'yellow' : isPaused ? 'blue' : controls.running ? 'green' : 'yellow'
+  // Default demo field
   const defaultLL: number[][] = [
     [27.364657, 37.656833],
     [27.368453, 37.657979],
@@ -102,8 +107,8 @@ function App() {
     }
   )
   const trStatus = (!controls.running && !!controls.paused)
-    ? 'Duraklatıldı'
-    : (state.status === 'Idle' ? 'Boşta' : state.status === 'Harvesting' ? 'Hasat' : state.status === 'Unloading' ? 'Boşaltılıyor' : 'Alarm')
+    ? 'Duraklatildi'
+    : (state.status === 'Idle' ? 'Bosta' : state.status === 'Harvesting' ? 'Hasat' : state.status === 'Unloading' ? 'Bosaltiliyor' : 'Alarm')
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -117,7 +122,7 @@ function App() {
                 : 'opacity-0 border border-transparent')
             }
           >
-            Dane Kaybı Alarmı — Hızı düşürünüz (≥ 7 km/sa kayıp artar)
+            Dane Kaybi Alarmi — Hizi dusurunuz (&gt;= 7 km/sa kayip artar)
           </div>
         </div>
         <div className="flex items-center justify-between px-6 xl:px-8 2xl:px-12">
@@ -139,12 +144,12 @@ function App() {
         </div>
         {state.summary && (
           <div className="card p-4 w-full px-6 xl:px-8 2xl:px-12">
-            <div className="text-lg font-semibold mb-2">Hasat Özeti</div>
+            <div className="text-lg font-semibold mb-2">Hasat Ozeti</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
               <div>Toplam hasat: <b>{state.summary.totalHarvestedKg.toFixed(0)} kg</b></div>
-              <div>Ortalama kayıp: <b>{state.summary.avgLossPct.toFixed(1)}%</b></div>
-              <div>Biçilen alan: <b>{state.summary.areaHa.toFixed(3)} ha</b></div>
-              <div>Ortalama hız: <b>{controls.targetSpeedKmh.toFixed(1)} km/sa</b></div>
+              <div>Ortalama kayip: <b>{state.summary.avgLossPct.toFixed(1)}%</b></div>
+              <div>Bicilen alan: <b>{state.summary.areaHa.toFixed(3)} ha</b></div>
+              <div>Ortalama hiz: <b>{controls.targetSpeedKmh.toFixed(1)} km/sa</b></div>
             </div>
           </div>
         )}
@@ -154,3 +159,4 @@ function App() {
 }
 
 export default App
+
