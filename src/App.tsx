@@ -42,15 +42,20 @@ function MetricsGrid({
     { label: 'Mesafe', value: `${distanceM.toFixed(0)} m` },
     { label: 'Alan', value: `${areaHarvestedHa.toFixed(3)} ha` },
     { label: 'Anlık Akış', value: `${throughputKgPerS.toFixed(1)} kg/sn` },
-    { label: 'Koordinat', value: coord, mono: true },
+    { label: 'Koordinat', value: coord, mono: true, wrap: true },
   ];
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-5 gap-3">
       {items.map((m) => (
-        <div key={m.label} className="card p-3 h-24 flex flex-col justify-between">
+        <div key={m.label} className="card p-3 min-h-[92px] flex flex-col justify-between">
           <div className="metric">
             <div className="text-slate-400 text-[11px] uppercase tracking-wider">{m.label}</div>
-            <div className={`value mt-1 text-right ${m.mono ? 'font-mono tabular-nums text-xl' : ''}`}>{m.value}</div>
+            <div
+              title={String(m.value)}
+              className={`value mt-1 text-right ${m.mono ? 'font-mono tabular-nums' : ''} ${m.wrap ? 'break-all text-base md:text-lg' : 'overflow-hidden text-ellipsis whitespace-nowrap text-xl md:text-2xl'}`}
+            >
+              {m.value}
+            </div>
           </div>
         </div>
       ))}
