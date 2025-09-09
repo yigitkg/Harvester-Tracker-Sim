@@ -35,7 +35,7 @@ function MetricsGrid({
     ? `${position[0].toFixed(5)}, ${position[1].toFixed(5)}`
     : '—';
   const items = [
-    { label: 'Hız', value: `${speedKmh.toFixed(1)} km/sa` },
+    { label: 'Araç Hız', value: `${speedKmh.toFixed(1)} km/sa` },
     { label: 'Hasat Hızı', value: `${harvestingRateTPerH.toFixed(2)} t/sa · ${harvestingRateKgPerMin.toFixed(0)} kg/dk` },
     { label: 'Hazne', value: `${tankKg.toFixed(0)} kg · ${tankFillPct.toFixed(0)}%` },
     { label: 'Dane Kaybı', value: `${lossPct.toFixed(1)}% · ${lossKgPerHa.toFixed(0)} kg/ha` },

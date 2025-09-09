@@ -56,7 +56,7 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
         ref={(m) => { mapRef.current = m; }}
         center={[37.6568, 27.366] as any}
         zoom={15}
-        style={{ height: '70vh', minHeight: 560, maxHeight: 900, width: '100%' }}
+        style={{ height: '70vh', minHeight: 560, maxHeight: 720, width: '100%' }}
       >
         <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {localPoly && (
