@@ -32,12 +32,12 @@ export interface MapFieldProps {
 
 export function MapField({ lanes, position, polygon, laneState }: MapFieldProps) {
   const mapRef = useRef<L.Map | null>(null);
-  const [localPoly, setLocalPoly] = useState<Polygon | null>(polygon ?? null);
   const boostedZoomRef = useRef(false);
-  useEffect(() => { if (polygon) setLocalPoly(polygon); }, [polygon]);
+  const fittedRef = useRef(false);
   useEffect(() => {
-    const target = polygon || localPoly;
-    if (mapRef.current && target) {
+    const target = polygon;
+    if (mapRef.current && target && !fittedRef.current) {
+      fittedRef.current = true;
       const b = turf.bbox(target as any);
       const sw = L.latLng(b[1], b[0]);
       const ne = L.latLng(b[3], b[2]);
@@ -46,14 +46,13 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
       if (!boostedZoomRef.current) {
         boostedZoomRef.current = true;
         const m = mapRef.current;
-        setTimeout(() => {
-          if (!m) return;
+        m?.once('moveend', () => {
           const current = m.getZoom();
-          m.setZoom(Math.min(19, current + 1), { animate: true } as any);
-        }, 150);
+          m.setZoom(Math.min(19, current + 2), { animate: true } as any);
+        });
       }
     }
-  }, [polygon, localPoly]);
+  }, [polygon]);
 
   const laneLatLngs = useMemo(() => (
     (lanes ?? [])
@@ -70,8 +69,8 @@ export function MapField({ lanes, position, polygon, laneState }: MapFieldProps)
         style={{ height: '70vh', minHeight: 560, maxHeight: 720, width: '100%' }}
       >
         <TileLayer attribution='&copy; OpenStreetMap contributors' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        {localPoly && (
-          <RLPolygon positions={coordsToLatLngs(localPoly.geometry.coordinates[0])} pathOptions={{ color: '#22c55e', weight: 2, fill: true, fillColor: '#16a34a', fillOpacity: 0.15 }} />
+        {polygon && (
+          <RLPolygon positions={coordsToLatLngs(polygon.geometry.coordinates[0])} pathOptions={{ color: '#22c55e', weight: 2, fill: true, fillColor: '#16a34a', fillOpacity: 0.15 }} />
         )}
         {laneLatLngs.map((ll, idx) => (
           <Polyline key={idx} positions={ll} pathOptions={{ color: '#94a3b8', weight: 2, opacity: 0.6 }} />
