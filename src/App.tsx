@@ -45,7 +45,10 @@ function MetricsGrid({
     { label: 'Arac Plakasi', value: '09 S 2162' },
     { label: 'Tohum Markasi', value: 'Progen Lucilla' },
     { label: 'Operator Ad Soyad', value: 'Ali Yilmaz' },
+    { label: 'Operator TC', value: '15790834652' },
+    { label: 'Operator Ehliyet No', value: 'BM-06-2024-0789' },
     { label: 'Koordinat', value: coord, mono: true, wrap: true },
+    { label: 'Nem', value: '55 %RH' },
   ];
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
